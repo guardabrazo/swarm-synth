@@ -1,0 +1,491 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  --bg-color: #050505;
+  --text-primary: #fff;
+  --text-secondary: #444;
+  --text-dim: rgb(128, 128, 128);
+  --accent: #00ffff;
+  --font-main: 'Helvetica Neue', 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  overflow: hidden;
+  cursor: crosshair;
+
+  /* Subtle Grid Background */
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 5, 5, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+
+  .start-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 4px;
+      font-weight: 400;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+    }
+
+    svg {
+      margin-bottom: 1rem;
+      opacity: 0.8;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  &:hover svg {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.ui-layer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1400px;
+  /* Increased to push columns outward */
+  height: 100%;
+  pointer-events: none;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .header,
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: auto;
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      .version-badge {
+        border: 1px solid #fff;
+        border-radius: 12px;
+        padding: 2px 10px;
+        font-size: 10px;
+        font-weight: 400;
+      }
+
+      .version-number {
+        color: var(--text-dim);
+        font-size: 10px;
+      }
+    }
+  }
+
+  .footer {
+    padding-bottom: 0;
+    padding-top: 1rem;
+    border-bottom: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .badge-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      border: none;
+      padding: 0;
+    }
+
+    .badge-text {
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      color: var(--text-dim);
+
+      a {
+        color: var(--text-dim);
+        text-decoration: none;
+        transition: color .2s;
+
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+
+    .separator {
+      color: var(--text-dim);
+      opacity: .5;
+    }
+
+    .credits-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: flex-end;
+
+      p {
+        font-size: 10px;
+        color: #fff;
+        margin: 0;
+        letter-spacing: 1px;
+      }
+
+      .sub-credit {
+        font-size: 10px;
+        opacity: 1;
+        color: var(--text-dim) !important;
+        text-align: right;
+      }
+    }
+  }
+
+  .logo {
+    font-weight: 400;
+    letter-spacing: 4px;
+    font-size: 14px;
+  }
+
+  .status {
+    color: var(--accent);
+  }
+
+  .instructions {
+    color: var(--text-dim);
+  }
+
+  .credits {
+    color: var(--text-dim);
+    opacity: 0.8;
+  }
+
+
+  .controls-panel {
+    position: absolute;
+    top: 0;
+    transform: none;
+    width: 280px;
+    /* Match Fractal Seq width */
+    padding: 0;
+    /* Remove padding so content aligns with header */
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    pointer-events: auto;
+    margin-top: 80px;
+
+    &.left {
+      left: 32px;
+      /* Offset from edge to align with header padding */
+    }
+
+    &.right {
+      right: 32px;
+      /* Offset from edge to align with header padding */
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      position: relative;
+      /* Added for ::after positioning */
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        font-weight: 400;
+        letter-spacing: 1px;
+        color: rgba(128, 128, 128, 1);
+        padding-bottom: 8px;
+        /* Removed border-bottom */
+        width: 100%;
+        /* Span full section width */
+      }
+
+      /* Border as a separate element after header */
+      .section-header::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-top: 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      /* Full width for the group */
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        color: rgba(128, 128, 128, 1);
+        width: 120px;
+        /* Increased from 80px to prevent wrap */
+        /* Match Fractal Seq label width */
+        flex-shrink: 0;
+
+        .value {
+          margin-left: auto;
+          font-family: 'Helvetica Neue';
+          color: var(--text-dim);
+          padding-right: 0px;
+          /* Add some space between value and slider */
+        }
+      }
+
+      /* Wrapper for controls to take remaining space */
+      input[type="range"],
+      select,
+      .waveform-group {
+        flex: 1;
+        width: auto;
+        /* Let flex handle width */
+        min-width: 0;
+        /* Prevent overflow */
+        max-width: 180px;
+        /* Limit width to keep sliders shorter */
+        margin-left: auto;
+        /* Push to right */
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        flex: 1;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.1);
+        outline: none;
+
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 12px;
+          height: 12px;
+          background: #000;
+          border: 1px solid #fff;
+          cursor: pointer;
+          transition: transform 0.1s;
+          border-radius: 0;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+        }
+
+        &::-moz-range-thumb {
+          width: 12px;
+          height: 12px;
+          background: #000;
+          border: 1px solid #fff;
+          cursor: pointer;
+          transition: transform 0.1s;
+          border-radius: 0;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+        }
+      }
+
+      select {
+        flex: 1;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 0px 0px;
+        font-family: inherit;
+        font-size: 10px;
+        outline: none;
+        cursor: pointer;
+        height: 18px;
+        line-height: 16px;
+
+        option {
+          background: #000;
+        }
+      }
+
+      input[type="checkbox"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: transparent;
+        cursor: pointer;
+        margin-left: auto;
+        flex-shrink: 0;
+        /* Prevent squishing */
+
+        &:checked {
+          background: #fff;
+        }
+
+        &:hover {
+          border-color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+
+    .waveform-group {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+
+      label {
+        min-width: auto;
+      }
+
+      .waveform-canvas {
+        width: 100% !important;
+        /* Force full width */
+        height: 60px;
+        cursor: ew-resize;
+        border: 1px solid rgb(50, 50, 50);
+        border-radius: 0px;
+      }
+    }
+  }
+
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    .app-container {
+      overflow-y: auto;
+      /* Allow scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .canvas-container {
+      position: fixed;
+      /* Keep canvas fixed background */
+      height: 60vh;
+      /* Visible area for cube */
+    }
+
+    .ui-layer {
+      position: relative;
+      left: 0;
+      transform: none;
+      width: 100%;
+      max-width: none;
+      height: auto;
+      min-height: 100vh;
+      display: block;
+      /* Stack content */
+      padding: 1rem;
+      overflow: visible;
+    }
+
+    .header {
+      position: relative;
+      margin-bottom: 50vh;
+      /* Push controls down to reveal cube */
+    }
+
+    .controls-panel {
+      position: relative;
+      top: auto;
+      left: auto !important;
+      right: auto !important;
+      transform: none;
+      width: 100%;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.8);
+      /* Dark background for legibility */
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer {
+      position: relative;
+      margin-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  }
+}

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fractal Sequencer</title>
+    <script type="module" crossorigin src="/fractal-seq/assets/index-iLxN0h14.js"></script>
+    <link rel="stylesheet" crossorigin href="/fractal-seq/assets/index-DprmRF2U.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <h1>FRACTAL SEQUENCER</h1>
+            </div>
+            <div class="header-right">
+                <div class="version-badge">BOID2AUDIO</div>
+                <span class="version-number">V 1.0</span>
+            </div>
+        </header>
+
+        <main class="main-grid">
+            <!-- Left Panel: Fractal Controls -->
+            <aside class="panel left-panel">
+                <div class="panel-header">
+                    <span class="panel-title">FRACTAL CONTROLS</span>
+                    <div class="info-icon-wrapper">
+                        <svg class="info-icon" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                        </svg>
+                        <div class="tooltip-text">Adjust density and length of the tree structure.</div>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="control-row">
+                        <label>BRANCHES</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="branches-slider" min="0" max="3" value="0" />
+                            <span class="value-display" id="branches-val">0</span>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>PATH</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="path-slider" min="0" max="1" step="0.01" value="0" />
+                            <span class="value-display" id="path-val">0.00</span>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>PLAYBACK</label>
+                        <select id="branch-playback-select">
+                            <option value="forward" selected>FORWARD</option>
+                            <option value="reverse">REVERSE</option>
+                            <option value="pendulum">PENDULUM</option>
+                            <option value="random">RANDOM</option>
+                        </select>
+                    </div>
+                    <div class="action-row">
+                        <button id="randomize-btn" class="btn-action">RANDOM TRUNK</button>
+                    </div>
+                </div>
+
+                <div class="panel-header">
+                    <span class="panel-title">BRANCH BEHAVIOR</span>
+                    <div class="info-icon-wrapper">
+                        <svg class="info-icon" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                        </svg>
+                        <div class="tooltip-text">Evolve sequence: Transpose, Invert, or Mutate at each level.</div>
+                    </div>
+                </div>
+                <div class="panel-content branch-config-container" id="branch-config-container">
+                    <!-- Level 1 -->
+                    <div class="branch-level-group">
+                        <div class="level-header">LEVEL 1</div>
+                        <div class="branch-row">
+                            <label class="side-label">LEFT</label>
+                            <select class="branch-select" data-level="0" data-side="left">
+                                <option value="transpose">TRANSPOSE</option>
+                                <option value="invert">INVERT</option>
+                                <option value="mutate">MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="0" data-side="left" value="3">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                        <div class="branch-row">
+                            <label class="side-label">RIGHT</label>
+                            <select class="branch-select" data-level="0" data-side="right">
+                                <option value="transpose">TRANSPOSE</option>
+                                <option value="invert">INVERT</option>
+                                <option value="mutate">MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="0" data-side="right" value="-3">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 2 -->
+                    <div class="branch-level-group">
+                        <div class="level-header">LEVEL 2</div>
+                        <div class="branch-row">
+                            <label class="side-label">LEFT</label>
+                            <select class="branch-select" data-level="1" data-side="left">
+                                <option value="transpose">TRANSPOSE</option>
+                                <option value="invert" selected>INVERT</option>
+                                <option value="mutate">MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="1" data-side="left" value="0">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                        <div class="branch-row">
+                            <label class="side-label">RIGHT</label>
+                            <select class="branch-select" data-level="1" data-side="right">
+                                <option value="transpose" selected>TRANSPOSE</option>
+                                <option value="invert">INVERT</option>
+                                <option value="mutate">MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="1" data-side="right" value="7">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 3 -->
+                    <div class="branch-level-group">
+                        <div class="level-header">LEVEL 3</div>
+                        <div class="branch-row">
+                            <label class="side-label">LEFT</label>
+                            <select class="branch-select" data-level="2" data-side="left">
+                                <option value="transpose">TRANSPOSE</option>
+                                <option value="invert">INVERT</option>
+                                <option value="mutate" selected>MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="2" data-side="left" value="3">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                        <div class="branch-row">
+                            <label class="side-label">RIGHT</label>
+                            <select class="branch-select" data-level="2" data-side="right">
+                                <option value="transpose">TRANSPOSE</option>
+                                <option value="invert" selected>INVERT</option>
+                                <option value="mutate">MUTATE</option>
+                            </select>
+                            <div class="stepper-wrapper branch-stepper">
+                                <button class="btn-stepper" data-action="dec">-</button>
+                                <input type="number" class="branch-param" data-level="2" data-side="right" value="0">
+                                <button class="btn-stepper" data-action="inc">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel: Visualizer -->
+            <section class="panel center-panel">
+                <div class="visualizer-container">
+                    <canvas id="visualizer" width="800" height="800"></canvas>
+                </div>
+            </section>
+
+            <!-- Right Panel: Synth & Sequence -->
+            <aside class="panel right-panel">
+                <div class="panel-header">
+                    <span class="panel-title">SEQUENCE</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-row">
+                        <label>SCALE</label>
+                        <select id="scale-select"></select>
+                    </div>
+                    <div class="control-row">
+                        <label>ORDER</label>
+                        <select id="order-select">
+                            <option value="forward" selected>FORWARD</option>
+                            <option value="backward">REVERSE</option>
+                            <option value="pendulum">PENDULUM</option>
+                            <option value="random">RANDOM</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>LENGTH</label>
+                        <div class="stepper-wrapper length-stepper">
+                            <button class="btn-stepper" id="length-dec">-</button>
+                            <input type="number" id="length-input" min="1" max="32" value="8" />
+                            <button class="btn-stepper" id="length-inc">+</button>
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>RATCHETS</label>
+                        <label class="toggle-wrapper gray-outline" for="ratchets-toggle">
+                            <input type="checkbox" id="ratchets-toggle" />
+                            <span class="toggle-indicator"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel-header">
+                    <span class="panel-title">SYNTH & FX</span>
+                </div>
+                <div class="panel-content">
+                    <div class="control-row">
+                        <label>WAVE</label>
+                        <select id="waveform-select">
+                            <option value="sine" selected>SINE</option>
+                            <option value="triangle">TRI</option>
+                            <option value="sawtooth">SAW</option>
+                            <option value="square">SQR</option>
+                        </select>
+                    </div>
+                    <div class="control-row">
+                        <label>CUTOFF</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="filter-cutoff" min="100" max="10000" value="2000" />
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>RES</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="filter-q" min="0" max="20" step="0.1" value="1" />
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>REV MIX</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="reverb-mix" min="0" max="1" step="0.01" value="0.3" />
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>REV SIZE</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="reverb-size" min="0.1" max="10" step="0.1" value="2" />
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>DLY MIX</label>
+                        <div class="control-wrapper">
+                            <input type="range" id="delay-mix" min="0" max="1" step="0.01" value="0" />
+                        </div>
+                    </div>
+                    <div class="control-row">
+                        <label>DLY TIME</label>
+                        <select id="delay-time">
+                            <option value="16n">1/16</option>
+                            <option value="8n" selected>1/8</option>
+                            <option value="8n.">1/8.</option>
+                            <option value="4n">1/4</option>
+                            <option value="2n">1/2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Transport Controls Moved Here -->
+                <section class="transport-section">
+                    <div class="panel-section">
+                        <div class="panel-header">OUTPUT</div>
+                        <div class="control-row">
+                            <label>MODE</label>
+                            <select id="output-mode-select" class="control-select">
+                                <option value="audio">AUDIO</option>
+                                <option value="midi">MIDI</option>
+                            </select>
+                        </div>
+                        <div class="control-row" id="midi-device-row" style="display: none;">
+                            <label>DEVICE</label>
+                            <select id="midi-device-select" class="control-select">
+                                <option value="">No MIDI devices</option>
+                            </select>
+                        </div>
+                        <div class="control-row">
+                            <label>VOLUME</label>
+                            <div class="control-wrapper">
+                                <input type="range" id="master-volume" min="0" max="100" value="100" />
+                                <span class="value-display" id="master-volume-val">100%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="panel-header">TRANSPORT</div>
+                        <div class="transport-controls">
+                            <button id="play-btn" class="btn-transport">PLAY</button>
+                            <button id="stop-btn" class="btn-transport">STOP</button>
+                        </div>
+                        <div class="bpm-control">
+                            <label>BPM: <span id="bpm-display">120</span></label>
+                            <input type="range" id="bpm-slider" min="40" max="300" value="120" />
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+
+        <footer class="app-footer">
+            <div class="footer-left">
+                <div class="badge-box">
+                    <span class="badge-text">GUARDABRAZO</span>
+                    <div class="footer-links">
+                        <a href="https://instagram.com/guardabrazo" target="_blank"
+                            rel="noopener noreferrer">INSTAGRAM</a>
+                        <span class="separator">|</span>
+                        <a href="https://linkedin.com/in/guardabrazo" target="_blank"
+                            rel="noopener noreferrer">LINKEDIN</a>
+                        <span class="separator">|</span>
+                        <a href="https://guardabrazo.com" target="_blank" rel="noopener noreferrer">WEBSITE</a>
+                    </div>
+                </div>
+            </div>
+            <div class="credits-text">
+                <p>ALGORITHMICALLY GENERATED</p>
+                <p class="sub-credit">ORCHESTRATED BY GOOGLE ANTIGRAVITY</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
