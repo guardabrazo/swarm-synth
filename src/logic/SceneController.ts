@@ -17,6 +17,7 @@ export class SceneController {
     cursorMesh: THREE.Mesh;
     interactionCube: THREE.Mesh; // Invisible cube for raycasting
     noiseSphere: THREE.Mesh; // Sphere that moves with noise
+    sceneGroup: THREE.Group; // Group to hold cube and gizmo for mobile positioning
     noiseTime: number = 0;
 
     private animationId: number | null = null;
@@ -30,7 +31,7 @@ export class SceneController {
 
         // Camera
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.z = 300;
+        // Camera position will be set by updateCameraAndControls
 
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -43,21 +44,28 @@ export class SceneController {
         this.controls.dampingFactor = 0.05;
         this.controls.enableZoom = false;
 
+        // Create scene group to hold cube and gizmo (for mobile positioning)
+        this.sceneGroup = new THREE.Group();
+        this.scene.add(this.sceneGroup);
+
+        // Set initial camera position and controls based on viewport
+        this.updateCameraAndControls();
+
         // Wireframe Cube
         const cubeGeo = new THREE.BoxGeometry(200, 200, 200);
         const cubeEdges = new THREE.EdgesGeometry(cubeGeo);
         const cubeMat = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.2, transparent: true });
         const cube = new THREE.LineSegments(cubeEdges, cubeMat);
-        this.scene.add(cube);
+        this.sceneGroup.add(cube);
 
         // Invisible cube for raycasting (same size as wireframe)
         const interactionCubeGeo = new THREE.BoxGeometry(200, 200, 200);
         const interactionCubeMat = new THREE.MeshBasicMaterial({ visible: false });
         this.interactionCube = new THREE.Mesh(interactionCubeGeo, interactionCubeMat);
-        this.scene.add(this.interactionCube);
+        this.sceneGroup.add(this.interactionCube);
 
-        // Boid System
-        this.boidSystem = new BoidSystem(this.scene, useStore.getState().boidCount);
+        // Boid System (add to sceneGroup so it moves with cube on mobile)
+        this.boidSystem = new BoidSystem(this.sceneGroup, useStore.getState().boidCount);
 
         // Interaction
         this.raycaster = new THREE.Raycaster();
@@ -201,7 +209,7 @@ export class SceneController {
         const gizmoGroup = new THREE.Group();
         // Position closer to corner (-100, -100, 100)
         gizmoGroup.position.set(-105, -105, 105);
-        this.scene.add(gizmoGroup);
+        this.sceneGroup.add(gizmoGroup);
 
         const axisLength = 25; // Smaller
         const arrowHeadLength = 4;
@@ -278,10 +286,34 @@ export class SceneController {
         if (zLabel) gizmoGroup.add(zLabel);
     }
 
+    updateCameraAndControls() {
+        const isMobile = window.innerWidth < 768;
+
+        if (isMobile) {
+            const cubeYPosition = 180; // How much to move the scene up
+            this.sceneGroup.position.y = cubeYPosition; // Move cube up
+            this.camera.position.set(0, cubeYPosition, 500); // Align camera with cube center
+
+            // Point camera directly at cube center for perfect frontal view
+            this.camera.lookAt(0, cubeYPosition, 0);
+            this.controls.target.set(0, cubeYPosition, 0);
+            this.controls.enabled = false;
+            this.controls.update();
+        } else {
+            this.camera.position.set(0, 0, 280);
+            this.camera.lookAt(0, 0, 0);
+            this.sceneGroup.position.y = 0; // Reset cube to center
+            this.controls.target.set(0, 0, 0);
+            this.controls.enabled = true;
+            this.controls.update();
+        }
+    }
+
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.updateCameraAndControls();
     }
 
     // Interaction Handlers called from React component

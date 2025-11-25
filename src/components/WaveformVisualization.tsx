@@ -23,72 +23,115 @@ export const WaveformVisualization: React.FC<WaveformVisualizationProps> = ({
     const localStartRef = useRef(sampleStart);
     const localEndRef = useRef(sampleEnd);
 
+    const animationFrameRef = useRef<number | null>(null);
+
     // Sync props to refs when not dragging
     useEffect(() => {
         if (!isDraggingRef.current) {
             localStartRef.current = sampleStart;
             localEndRef.current = sampleEnd;
-            drawWaveform();
+            scheduleDraw();
         }
     }, [sampleStart, sampleEnd]);
 
     useEffect(() => {
-        // If sample URL changed, we're loading a new sample
-        if (selectedSample !== lastDrawnSampleRef.current) {
-            setIsLoading(true);
-        }
+        // Poll for loading status
+        const pollInterval = setInterval(() => {
+            const engine = AudioEngine.getInstance();
+            const buffer = engine.getBuffer();
+            const engineLoading = engine.isLoading();
 
-        // Draw immediately
-        drawWaveform();
-
-        // Keep trying to draw every 100ms while loading
-        const loadingInterval = setInterval(() => {
-            if (isLoading) {
-                drawWaveform();
+            // If engine is loading OR buffer is not loaded/ready
+            if (engineLoading || !buffer || !buffer.loaded) {
+                if (!isLoading) {
+                    setIsLoading(true);
+                    scheduleDraw();
+                }
+            } else {
+                // Engine is done and buffer is ready
+                if (isLoading) {
+                    setIsLoading(false);
+                    scheduleDraw();
+                } else if (selectedSample !== lastDrawnSampleRef.current) {
+                    lastDrawnSampleRef.current = selectedSample;
+                    scheduleDraw();
+                }
             }
         }, 100);
 
-        return () => {
-            clearInterval(loadingInterval);
-        };
+        return () => clearInterval(pollInterval);
     }, [selectedSample, isLoading]);
 
-    const drawWaveform = () => {
+    // Trigger draw when loading state changes
+    useEffect(() => {
+        scheduleDraw();
+    }, [isLoading]);
+
+    // Handle resize
+    useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const { width } = entry.contentRect;
+                // Set internal resolution to match display size
+                canvas.width = width;
+                // Redraw after resize
+                scheduleDraw();
+            }
+        });
+
+        resizeObserver.observe(canvas);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, []);
+
+    const scheduleDraw = () => {
+        // Direct call to debug visibility
+        // console.log('scheduleDraw called');
+        drawWaveform();
+    };
+
+    const drawWaveform = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+            return;
+        }
+
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if (!ctx) {
+            return;
+        }
 
         // Clear canvas
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const buffer = AudioEngine.getInstance().getBuffer();
-
-        if (!buffer || !buffer.loaded) {
-            // Buffer not loaded yet - show loading message
-            ctx.fillStyle = '#666';
-            ctx.font = '12px Helvetica Neue, sans-serif';
+        if (isLoading) {
+            ctx.fillStyle = '#999';
+            ctx.font = '10px Helvetica Neue, sans-serif';
             ctx.textAlign = 'center';
+            ctx.font
             ctx.textBaseline = 'middle';
-            ctx.fillText('', canvas.width / 2, canvas.height / 2);
-            setIsLoading(true);
+            ctx.fillText('START AUDIO TO SEE WAVEFORM', canvas.width / 2, canvas.height / 2);
             return;
         }
 
-        // Buffer is loaded - check if it's the current sample
-        // If we just finished loading, update our reference
-        if (isLoading) {
-            lastDrawnSampleRef.current = selectedSample;
-            setIsLoading(false);
+        const buffer = AudioEngine.getInstance().getBuffer();
+        if (!buffer || !buffer.loaded) {
+
+            return;
         }
 
         const width = canvas.width;
         const height = canvas.height;
         const data = buffer.getChannelData(0);
 
-        // Draw waveform
+
+        // Draw waveform - Optimized to avoid allocations
         ctx.strokeStyle = '#444';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -97,8 +140,24 @@ export const WaveformVisualization: React.FC<WaveformVisualizationProps> = ({
         const amp = height / 2;
 
         for (let i = 0; i < width; i++) {
-            const min = Math.min(...Array.from(data.slice(i * step, (i + 1) * step)));
-            const max = Math.max(...Array.from(data.slice(i * step, (i + 1) * step)));
+            let min = 1.0;
+            let max = -1.0;
+
+            // Find min/max in this chunk without creating new arrays
+            const startIdx = i * step;
+            const endIdx = Math.min((i + 1) * step, data.length);
+
+            for (let j = startIdx; j < endIdx; j++) {
+                const val = data[j];
+                if (val < min) min = val;
+                if (val > max) max = val;
+            }
+
+            // Handle silence/empty chunks
+            if (min > max) {
+                min = 0;
+                max = 0;
+            }
 
             if (i === 0) {
                 ctx.moveTo(i, (1 + min) * amp);
@@ -175,7 +234,7 @@ export const WaveformVisualization: React.FC<WaveformVisualizationProps> = ({
             localEndRef.current = Math.max(normalized, localStartRef.current + 0.01);
         }
 
-        drawWaveform();
+        scheduleDraw();
 
         e.preventDefault();
         e.stopPropagation();
@@ -206,7 +265,7 @@ export const WaveformVisualization: React.FC<WaveformVisualizationProps> = ({
                 localEndRef.current = Math.max(normalized, localStartRef.current + 0.01);
             }
 
-            drawWaveform();
+            scheduleDraw();
         };
 
         const handleGlobalMouseUp = () => {
@@ -222,13 +281,13 @@ export const WaveformVisualization: React.FC<WaveformVisualizationProps> = ({
         return () => {
             window.removeEventListener('mousemove', handleGlobalMouseMove);
             window.removeEventListener('mouseup', handleGlobalMouseUp);
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
         };
     }, [isLoading, onWindowChange]);
 
     return (
         <canvas
             ref={canvasRef}
-            width={350}
             height={60}
             className="waveform-canvas"
             onMouseDown={handleMouseDown}

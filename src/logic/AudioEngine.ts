@@ -112,14 +112,25 @@ export class AudioEngine {
         }
     }
 
+    private isSampleLoading: boolean = false;
+
+    // ... existing properties ...
+
     public async setSample(url: string) {
         if (this.buffer) {
+            this.isSampleLoading = true;
             try {
                 await this.buffer.load(url);
             } catch (e) {
                 console.error("Failed to load sample", e);
+            } finally {
+                this.isSampleLoading = false;
             }
         }
+    }
+
+    public isLoading(): boolean {
+        return this.isSampleLoading;
     }
 
     public setSampleWindow(start: number, end: number) {

@@ -20,7 +20,6 @@ body {
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-main);
-  overflow: hidden;
   cursor: crosshair;
 
   /* Subtle Grid Background */
@@ -28,13 +27,35 @@ body {
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   background-size: 20px 20px;
+
+  /* Allow scrolling on mobile */
+  @media (max-width: 767px) {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* No scroll on desktop */
+  @media (min-width: 768px) {
+    overflow: hidden;
+  }
 }
 
 .app-container {
   width: 100vw;
-  height: 100vh;
   position: relative;
-  overflow: hidden;
+
+  /* Allow content to flow on mobile */
+  @media (max-width: 767px) {
+    min-height: 100vh;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Fixed height on desktop */
+  @media (min-width: 768px) {
+    height: 100vh;
+    overflow: hidden;
+  }
 }
 
 .canvas-container {
@@ -44,6 +65,14 @@ body {
   top: 0;
   left: 0;
   z-index: 0;
+
+  /* Crop from top on mobile to make cube appear higher */
+  @media (max-width: 767px) {
+    height: 120%;
+    /* Extend canvas height */
+    transform: translateY(-15%);
+    /* Shift up to crop top */
+  }
 }
 
 .overlay {
@@ -463,8 +492,8 @@ body {
 
     .header {
       position: relative;
-      margin-bottom: 50vh;
-      /* Push controls down to reveal cube */
+      margin-bottom: 20vh;
+      /* Reduced from 50vh to move controls higher */
     }
 
     .controls-panel {
@@ -477,9 +506,37 @@ body {
       margin-bottom: 2rem;
       padding: 1rem;
       background: rgba(0, 0, 0, 0.8);
-      /* Dark background for legibility */
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 8px;
+      /* Reduce gap from 24px on desktop to 8px on mobile */
+
+      /* Only first panel (left/SIMULATION) gets large top margin to clear cube */
+      &.left {
+        margin-top: 25vh;
+        /* Add space above controls to clear the cube */
+      }
+
+      /* Second panel (right/AUDIO ENGINE) has minimal margin for tight stacking */
+      &.right {
+        margin-top: 0;
+      }
+
+      /* Use flexbox for reordering on mobile */
+      .section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        /* Tighter spacing between controls within a section */
+
+        /* Power button (Start Audio) should be first on mobile */
+        .control-group:has(.power-button) {
+          order: -1;
+          /* Move to top */
+          margin-top: 0 !important;
+          margin-bottom: 20px;
+        }
+      }
     }
 
     .footer {

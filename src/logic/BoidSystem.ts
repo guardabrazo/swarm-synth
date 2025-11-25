@@ -49,8 +49,10 @@ class Boid {
         // Update mesh
         this.mesh.position.copy(this.position);
 
-        // Orient mesh to face velocity
-        const target = this.position.clone().add(this.velocity);
+        // Orient mesh to face velocity (use world coordinates)
+        const worldPos = new THREE.Vector3();
+        this.mesh.getWorldPosition(worldPos);
+        const target = worldPos.clone().add(this.velocity);
         this.mesh.lookAt(target);
         // Rotate 90 degrees on X because ConeGeometry points up by default
         // For Sphere it doesn't matter, for Line (Cylinder) it might need adjustment depending on geometry
@@ -228,7 +230,7 @@ class Boid {
 
 export class BoidSystem {
     boids: Boid[] = [];
-    scene: THREE.Scene;
+    scene: THREE.Object3D;
     bounds: number = 100; // Matches cube half-size (200x200x200)
 
     currentShape: string = 'cone';
@@ -241,7 +243,7 @@ export class BoidSystem {
     maxSpeed: number = 2.0;
     triggerFrequency: number = 0.5;
 
-    constructor(scene: THREE.Scene, count: number) {
+    constructor(scene: THREE.Object3D, count: number) {
         this.scene = scene;
         this.currentGeometry = new THREE.ConeGeometry(2, 8, 8);
         this.setCount(count);
