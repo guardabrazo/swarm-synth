@@ -32,10 +32,15 @@ class Boid {
         this.cooldown = Math.random() * this.maxCooldown;
     }
 
-    update(bounds: number, frequency: number) {
-        this.velocity.add(this.acceleration);
+    update(bounds: number, frequency: number, timeScale: number) {
+        // Apply acceleration scaled by time
+        this.velocity.add(this.acceleration.multiplyScalar(timeScale));
         this.velocity.clampLength(0, this.maxSpeed);
-        this.position.add(this.velocity);
+
+        // Apply velocity scaled by time
+        const moveStep = this.velocity.clone().multiplyScalar(timeScale);
+        this.position.add(moveStep);
+
         this.acceleration.set(0, 0, 0);
 
         // Toroidal wrapping
@@ -52,11 +57,10 @@ class Boid {
         // Orient mesh to face velocity (use world coordinates)
         const worldPos = new THREE.Vector3();
         this.mesh.getWorldPosition(worldPos);
+        // Look at where we will be next frame (approx)
         const target = worldPos.clone().add(this.velocity);
         this.mesh.lookAt(target);
         // Rotate 90 degrees on X because ConeGeometry points up by default
-        // For Sphere it doesn't matter, for Line (Cylinder) it might need adjustment depending on geometry
-        // Assuming Cone/Cylinder are Y-up
         this.mesh.rotateX(Math.PI / 2);
 
         // Handle Cooldown & Trigger
@@ -66,7 +70,7 @@ class Boid {
         const maxCD = 300;
         this.maxCooldown = maxCD - (frequency * (maxCD - minCD));
 
-        this.cooldown--;
+        this.cooldown -= 1 * timeScale;
         if (this.cooldown <= 0) {
             this.trigger();
         }
@@ -74,19 +78,19 @@ class Boid {
         // Color decay
         const material = this.mesh.material as THREE.MeshBasicMaterial;
         // Fade from White (1,1,1) to Dark Gray (0.13, 0.13, 0.13) -> 0x222222
-        // 0x22 is approx 0.13
         const baseColor = 0.13;
+        const decayRate = 0.05 * timeScale;
 
         if (material.color.r > baseColor) {
-            material.color.r -= 0.05;
+            material.color.r -= decayRate;
             if (material.color.r < baseColor) material.color.r = baseColor;
         }
         if (material.color.g > baseColor) {
-            material.color.g -= 0.05;
+            material.color.g -= decayRate;
             if (material.color.g < baseColor) material.color.g = baseColor;
         }
         if (material.color.b > baseColor) {
-            material.color.b -= 0.05;
+            material.color.b -= decayRate;
             if (material.color.b < baseColor) material.color.b = baseColor;
         }
 
@@ -103,7 +107,7 @@ class Boid {
             material.opacity = Math.max(0, distanceFromEdge / fadeDistance);
         } else {
             // Fade in when inside
-            material.opacity = Math.min(1, material.opacity + 0.05);
+            material.opacity = Math.min(1, material.opacity + (0.05 * timeScale));
         }
     }
 
@@ -145,6 +149,7 @@ class Boid {
         }
     }
 
+    // ... seek, separate, align, cohesion methods remain unchanged ...
     seek(target: THREE.Vector3): THREE.Vector3 {
         const desired = new THREE.Vector3().subVectors(target, this.position);
         desired.normalize();
@@ -381,7 +386,7 @@ export class BoidSystem {
     setFrequency(freq: number) { this.triggerFrequency = freq; }
 
     update(target: THREE.Vector3 | null, forces: { separation: number, alignment: number, cohesion: number, maxSpeed: number, frequency: number },
-        noiseSpherePosition: THREE.Vector3 | null = null, noiseSphereForce: number = 0) {
+        noiseSpherePosition: THREE.Vector3 | null = null, noiseSphereForce: number = 0, timeScale: number = 1.0) {
         for (const boid of this.boids) {
             // Apply flocking rules
             const sep = boid.separate(this.boids).multiplyScalar(forces.separation);
@@ -419,7 +424,7 @@ export class BoidSystem {
 
             // Update boid with frequency
             boid.maxSpeed = forces.maxSpeed;
-            boid.update(this.bounds, forces.frequency);
+            boid.update(this.bounds, forces.frequency, timeScale);
         }
     }
 

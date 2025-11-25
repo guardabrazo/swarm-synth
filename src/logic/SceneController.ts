@@ -20,6 +20,8 @@ export class SceneController {
     sceneGroup: THREE.Group; // Group to hold cube and gizmo for mobile positioning
     noiseTime: number = 0;
 
+    clock: THREE.Clock;
+
     private animationId: number | null = null;
     private unsubscribe: () => void;
 
@@ -28,6 +30,8 @@ export class SceneController {
         this.scene = new THREE.Scene();
         // Transparent background to let CSS grid show through if we want, or keep black
         this.scene.background = null;
+
+        this.clock = new THREE.Clock();
 
         // Camera
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -133,6 +137,7 @@ export class SceneController {
 
     start() {
         if (!this.animationId) {
+            this.clock.start();
             this.animate();
         }
     }
@@ -141,17 +146,25 @@ export class SceneController {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
+            this.clock.stop();
         }
     }
 
     animate = () => {
         this.animationId = requestAnimationFrame(this.animate);
 
+        const delta = this.clock.getDelta();
+        // Normalize delta to 60fps (approx 0.016s)
+        // If running at 60fps, timeScale is 1.0
+        // If running at 120fps, timeScale is 0.5
+        // If running at 30fps, timeScale is 2.0
+        const timeScale = delta * 60;
+
         this.controls.update();
 
         // Update noise sphere
         const { noiseSphereEnabled, noiseSphereForce, noiseSphereSpeed } = useStore.getState();
-        this.updateNoiseSphere(noiseSphereEnabled, noiseSphereForce, noiseSphereSpeed);
+        this.updateNoiseSphere(noiseSphereEnabled, noiseSphereForce, noiseSphereSpeed, timeScale);
 
         // Interaction Logic
         const { interactionState, separationForce, alignmentForce, cohesionForce, maxSpeed, triggerFrequency } = useStore.getState();
@@ -181,12 +194,12 @@ export class SceneController {
         }
 
         this.boidSystem.update(target, { separation: separationForce, alignment: alignmentForce, cohesion: cohesionForce, maxSpeed, frequency: triggerFrequency },
-            noiseSphereEnabled ? this.noiseSphere.position : null, noiseSphereForce);
+            noiseSphereEnabled ? this.noiseSphere.position : null, noiseSphereForce, timeScale);
 
         this.renderer.render(this.scene, this.camera);
     };
 
-    updateNoiseSphere(enabled: boolean, _force: number, speed: number) {
+    updateNoiseSphere(enabled: boolean, _force: number, speed: number, timeScale: number) {
         if (!enabled) {
             this.noiseSphere.visible = false;
             return;
@@ -195,7 +208,8 @@ export class SceneController {
         this.noiseSphere.visible = true;
 
         // Move sphere using 3D Perlin noise
-        this.noiseTime += 0.001 + (speed * 0.01); // Speed controlled by slider
+        // Scale speed by timeScale to maintain consistent speed
+        this.noiseTime += (0.001 + (speed * 0.01)) * timeScale;
         const scale = 0.3; // Frequency of noise
 
         const x = noise3D.noise(this.noiseTime * scale, 0, 0) * 250; // Increased range
