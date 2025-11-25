@@ -64,7 +64,7 @@ export class AudioEngine {
 
         // Load default local sample
         this.buffer = new Tone.ToneAudioBuffer();
-        await this.buffer.load('/src/assets/samples/Vocal Female.wav');
+        await this.buffer.load('/swarm-synth/samples/Vocal Female.mp3');
 
         this.isReady = true;
         console.log('Audio Engine Ready');
@@ -85,7 +85,7 @@ export class AudioEngine {
         } else {
             // Access rawContext to suspend
             const ctx = Tone.context.rawContext;
-            await ctx.suspend();
+            await ctx.suspend(0);
             return false;
         }
     }

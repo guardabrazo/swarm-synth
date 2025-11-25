@@ -241,26 +241,26 @@ export const Controls: React.FC = () => {
                             <span>SAMPLE</span>
                         </label>
                         <select value={selectedSample} onChange={handleSampleChange}>
-                            <option value="/src/assets/samples/Rhodes.wav">RHODES</option>
-                            <option value="/src/assets/samples/E-Piano.wav">E-PIANO</option>
-                            <option value="/src/assets/samples/Guitar Loop.wav">GUITAR LOOP</option>
-                            <option value="/src/assets/samples/Vocal Male.wav">VOCAL MALE</option>
-                            <option value="/src/assets/samples/Vocal Female.wav">VOCAL FEMALE</option>
-                            <option value="/src/assets/samples/Banjo Arpeggio.wav">BANJO ARP</option>
-                            <option value="/src/assets/samples/Bass.wav">BASS</option>
-                            <option value="/src/assets/samples/Break.wav">BREAK</option>
-                            <option value="/src/assets/samples/Bowed Lids.wav">BOWED LIDS</option>
-                            <option value="/src/assets/samples/Cat Purring.wav">CAT PURR</option>
-                            <option value="/src/assets/samples/Clay Flute.wav">CLAY FLUTE</option>
-                            <option value="/src/assets/samples/Dubstep.wav">DUBSTEP</option>
-                            <option value="/src/assets/samples/Female Vocal Reverb.wav">VOCAL REV</option>
-                            <option value="/src/assets/samples/Forest Ambience.wav">FOREST</option>
-                            <option value="/src/assets/samples/Radio Station Search.wav">RADIO</option>
-                            <option value="/src/assets/samples/Sandpaper Strings.wav">SANDPAPER</option>
-                            <option value="/src/assets/samples/Soundboard Whale.wav">WHALE</option>
-                            <option value="/src/assets/samples/Strings.wav">STRINGS</option>
-                            <option value="/src/assets/samples/Tea Cups.wav">TEA CUPS</option>
-                            <option value="/src/assets/samples/Vinyl Dirt.wav">VINYL</option>
+                            <option value="/swarm-synth/samples/Rhodes.mp3">RHODES</option>
+                            <option value="/swarm-synth/samples/E-Piano.mp3">E-PIANO</option>
+                            <option value="/swarm-synth/samples/Guitar Loop.mp3">GUITAR LOOP</option>
+                            <option value="/swarm-synth/samples/Vocal Male.mp3">VOCAL MALE</option>
+                            <option value="/swarm-synth/samples/Vocal Female.mp3">VOCAL FEMALE</option>
+                            <option value="/swarm-synth/samples/Banjo Arpeggio.mp3">BANJO ARP</option>
+                            <option value="/swarm-synth/samples/Bass.mp3">BASS</option>
+                            <option value="/swarm-synth/samples/Break.mp3">BREAK</option>
+                            <option value="/swarm-synth/samples/Bowed Lids.mp3">BOWED LIDS</option>
+                            <option value="/swarm-synth/samples/Cat Purring.mp3">CAT PURR</option>
+                            <option value="/swarm-synth/samples/Clay Flute.mp3">CLAY FLUTE</option>
+                            <option value="/swarm-synth/samples/Dubstep.mp3">DUBSTEP</option>
+                            <option value="/swarm-synth/samples/Female Vocal Reverb.mp3">VOCAL REV</option>
+                            <option value="/swarm-synth/samples/Forest Ambience.mp3">FOREST</option>
+                            <option value="/swarm-synth/samples/Radio Station Search.mp3">RADIO</option>
+                            <option value="/swarm-synth/samples/Sandpaper Strings.mp3">SANDPAPER</option>
+                            <option value="/swarm-synth/samples/Soundboard Whale.mp3">WHALE</option>
+                            <option value="/swarm-synth/samples/Strings.mp3">STRINGS</option>
+                            <option value="/swarm-synth/samples/Tea Cups.mp3">TEA CUPS</option>
+                            <option value="/swarm-synth/samples/Vinyl Dirt.mp3">VINYL</option>
                         </select>
                     </div>
 

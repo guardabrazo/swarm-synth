@@ -83,7 +83,7 @@ export const useStore = create<AppState>((set) => ({
   reverbWet: 0.5,
   masterVolume: -10,
   selectedScale: 'minor',
-  selectedSample: '/src/assets/samples/Vocal Female.wav',
+  selectedSample: '/swarm-synth/samples/Vocal Female.mp3',
 
   separationForce: 1.5,
   alignmentForce: 1.0,

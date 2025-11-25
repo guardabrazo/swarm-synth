@@ -186,7 +186,7 @@ export class SceneController {
         this.renderer.render(this.scene, this.camera);
     };
 
-    updateNoiseSphere(enabled: boolean, force: number, speed: number) {
+    updateNoiseSphere(enabled: boolean, _force: number, speed: number) {
         if (!enabled) {
             this.noiseSphere.visible = false;
             return;
