@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../store';
 import { AudioEngine } from '../logic/AudioEngine';
 import { WaveformVisualization } from './WaveformVisualization';
+import { PRESETS } from '../presets';
 
 export const Controls: React.FC = () => {
     const {
@@ -28,6 +29,54 @@ export const Controls: React.FC = () => {
         noiseSphereForce, setNoiseSphereForce,
         noiseSphereSpeed, setNoiseSphereSpeed
     } = useStore();
+
+    const [selectedPreset, setSelectedPreset] = useState<string>('Choir');
+
+    const handlePresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const presetName = e.target.value;
+        setSelectedPreset(presetName);
+        const preset = PRESETS[presetName];
+        if (!preset) return;
+
+        // Update Store
+        setBoidCount(preset.boidCount);
+        setSeparationForce(preset.separationForce);
+        setAlignmentForce(preset.alignmentForce);
+        setCohesionForce(preset.cohesionForce);
+        setMaxSpeed(preset.maxSpeed);
+        setTriggerFrequency(preset.triggerFrequency);
+        setBoidShape(preset.boidShape);
+        setNoiseSphereEnabled(preset.noiseSphereEnabled);
+        setNoiseSphereForce(preset.noiseSphereForce);
+        setNoiseSphereSpeed(preset.noiseSphereSpeed);
+
+        setSelectedSample(preset.selectedSample);
+        setSampleStart(preset.sampleStart);
+        setSampleEnd(preset.sampleEnd);
+        setFilterCutoff(preset.filterCutoff);
+        setFilterResonance(preset.filterResonance);
+        setGrainFadeIn(preset.grainFadeIn);
+        setGrainFadeOut(preset.grainFadeOut);
+        setGrainSize(preset.grainSize);
+        setGrainPitchRange(preset.grainPitchRange);
+        setSelectedScale(preset.selectedScale);
+        setReverbWet(preset.reverbWet);
+        setMasterVolume(preset.masterVolume);
+
+        // Update Audio Engine
+        const audio = AudioEngine.getInstance();
+        audio.setSample(preset.selectedSample);
+        audio.setSampleWindow(preset.sampleStart, preset.sampleEnd);
+        audio.setFilterCutoff(preset.filterCutoff);
+        audio.setFilterResonance(preset.filterResonance);
+        audio.setGrainFadeIn(preset.grainFadeIn);
+        audio.setGrainFadeOut(preset.grainFadeOut);
+        audio.setGrainSize(preset.grainSize);
+        audio.setGrainPitchRange(preset.grainPitchRange);
+        audio.setScale(preset.selectedScale);
+        audio.setReverb(preset.reverbWet);
+        audio.setVolume(preset.masterVolume);
+    };
 
     const handleSampleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const url = e.target.value;
@@ -74,6 +123,19 @@ export const Controls: React.FC = () => {
     return (
         <>
             <div className="controls-panel left">
+                <div className="section">
+                    <div className="section-header">
+                        <span>PRESETS</span>
+                    </div>
+                    <div className="control-group">
+                        <select value={selectedPreset} onChange={handlePresetChange}>
+                            {Object.keys(PRESETS).map(key => (
+                                <option key={key} value={key}>{PRESETS[key].name.toUpperCase()}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
                 <div className="section">
                     <div className="section-header">
                         <span>SIMULATION</span>
