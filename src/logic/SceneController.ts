@@ -47,6 +47,7 @@ export class SceneController {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.enableZoom = false;
+        this.controls.enablePan = false;
 
         // Create scene group to hold cube and gizmo (for mobile positioning)
         this.sceneGroup = new THREE.Group();
